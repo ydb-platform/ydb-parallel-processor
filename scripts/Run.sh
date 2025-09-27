@@ -1,3 +1,3 @@
 #! /bin/sh
 
-java -jar lib/ydb-parallel-exporter-*.jar $@
+java -jar lib/ydb-parallel-processor-*.jar $@
