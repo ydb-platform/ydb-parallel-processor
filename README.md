@@ -112,7 +112,7 @@ Processing parameters are provided either programmatically (as `tech.ydb.app.par
 | `query-main` | Main query (executed first) |
 | `query-page` | Paging query (optional). Requires key sorting and row count limit both for itself and for the main query. |
 | `query-details` | Detail query. Takes the keys from main and page queries, and applies extra logic. |
-| `input-page` | List of input columns for the page query (subset of columns from main and page queries), optional |
+| `input-page` | List of input columns for the page query (subset of columns from main and page queries). |
 | `input-details` | List of input columns for the detail query (subset of columns from main and page queries), optional |
 
 In the tags `query-main`, `query-page` and `query-details` an optional `timeout` attribute can also be specified, setting the maximum execution time of the query in milliseconds. If the specified time is exceeded, the query execution is aborted and retried. This timeout mechanism helps protect against performance degradation caused by rare slowdowns of query execution.
