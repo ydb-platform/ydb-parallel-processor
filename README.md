@@ -31,7 +31,7 @@ Phase 2 is executed using the configurable executor pool, providing parallel exe
 * The second parameter should point to the file with the job definition.
 * The optional third parameter can be missing, or should point to the file with the substitution variables.
 
-For information about the substitution variables, see the section at the end of the README file.
+For information about the substitution variables, see the section at the end of this file (`README.md`), or in the corresponding section of `README-ru.md`.
 
 ## Embedding the tool into the user program
 
@@ -55,6 +55,7 @@ Using the class `tech.ydb.app.parproc.Tool`, the following can be implemented:
 JobDef job = new JobDef();
 job.setMainQuery("SELECT ...");
 job.setDetailsQuery("SELECT ...");
+job.getDetailsInput().add("id");
 ...
 Properties propsConn = new Properties();
 propsConn.setProperty("ydb.url", "grpcs://ydb01.localdomain:2135/cluster1/testdb");
@@ -110,15 +111,19 @@ Processing parameters are provided either programmatically (as `tech.ydb.app.par
 | `timeout` | Query timeout, in milliseconds, for query-main, query-page or query-detail, default -1 (unlimited) |
 | `query-main` | Main query (executed first) |
 | `query-page` | Paging query (optional). Requires key sorting and row count limit both for itself and for the main query. |
-| `query-detail` | Detail query. Takes the keys from main and page queries, and applies extra logic. |
+| `query-details` | Detail query. Takes the keys from main and page queries, and applies extra logic. |
 | `input-page` | List of input columns for the page query (subset of columns from main and page queries), optional |
 | `input-details` | List of input columns for the detail query (subset of columns from main and page queries), optional |
+
+In the tags `query-main`, `query-page` and `query-details` an optional `timeout` attribute can also be specified, setting the maximum execution time of the query in milliseconds. If the specified time is exceeded, the query execution is aborted and retried. This timeout mechanism helps protect against performance degradation caused by rare slowdowns of query execution.
 
 Supported output formats:
 - `CSV` - regular CSV according to RFC4180, with comma delimited, double quotes, and CR-LF line separators
 - `TSV` - tab-delimoted format, double quotes, CR-LF
 - `JSON` - a separate JSON document per line, CR delimited
 - `CUSTOM1` - CSV-style format with 0x19 as field delimiter, LF (0x0A) as record delimiter and minimized (mostly no) quotes.
+
+Example configuration file:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -152,10 +157,10 @@ WHERE (sys_update_tv, id) > ($input.sys_update_tv, $input.id) -- Paging conditio
 ORDER BY sys_update_tv, id   -- Mandatory sorting on primary key or secondary index
 LIMIT 1000;   -- Mandatory limit on the number of output records
 ]]> </query-page>
-    <input-details timeout="10000">
+    <input-details>
         <column-name>id</column-name>
     </input-details>
-    <query-details><![CDATA[
+    <query-details timeout="10000"><![CDATA[
 DECLARE $input AS List<Struct<id:Text>>;
 SELECT
     documents.*,
@@ -271,7 +276,7 @@ The old documents should be put into the `documents_archive` table, and deleted 
     <output-file>-</output-file>
     <isolation>SERIALIZABLE_RW</isolation>
 
-    <!-- Select records to archive (older than 1 year) -->
+    <!-- Select records to archive (older than 92 days, ~3 months) -->
     <query-main timeout="120000"><![CDATA[
 SELECT id FROM documents
 WHERE created_date < CurrentUtcTimestamp() - Interval('P92D');
