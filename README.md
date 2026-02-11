@@ -35,6 +35,20 @@ For information about the substitution variables, see the section at the end of 
 
 ## Embedding the tool into the user program
 
+Embedding the tool into the user program can be performed using the following Maven dependency:
+
+```xml
+        <dependency>
+            <groupId>tech.ydb.app</groupId>
+            <artifactId>ydb-parallel-processor</artifactId>
+            <version>1.3</version>
+        </dependency>
+```
+
+> [!WARNING]
+> Currently the tool artifacts are not published to Maven Central.
+> In order to use the dependency shown above, local build is necessary.
+
 Using the class `tech.ydb.app.parproc.Tool`, the following can be implemented:
 
 ```java

@@ -1,4 +1,4 @@
-## YDB: параллельный обработчик батчей записей
+## YDB: параллельный пакетный обработчик записей
 
 [См. страницу релизов для загрузки](https://github.com/zinal/ydb-parallel-processor/releases).
 
@@ -41,18 +41,33 @@
   с подставляемыми переменными.
 
 Дополнительную информацию о подстановочных переменных см. в разделе
-в конце этого файла (`README-ru.md`), аналогичном разделу в `README.md`.
+в конце этого файла (`README-ru.md`), либо в аналогичном разделе в `README.md`.
 
 ## Встраивание инструмента в пользовательскую программу
+
+Для встраивания инструмента в собственное приложение может использоваться зависимость Maven:
+
+```xml
+        <dependency>
+            <groupId>tech.ydb.app</groupId>
+            <artifactId>ydb-parallel-processor</artifactId>
+            <version>1.3</version>
+        </dependency>
+```
+
+> [!WARNING]
+> В настоящее время не осуществляется публикация артефактов приложения в Maven Central.
+> Для работы с указанной выше зависимостью требуется выполнить локальную сборку.
 
 Используя класс `tech.ydb.app.parproc.Tool`, можно реализовать, например, следующее:
 
 ```java
-JobDef job = new JobDef();
+var job = new JobDef();
 job.setMainQuery("SELECT ...");
 job.setDetailsQuery("SELECT ...");
+job.getDetailsInput().add("id");
 ...
-Properties propsConn = new Properties();
+var propsConn = new Properties();
 propsConn.setProperty("ydb.url", "grpcs://ydb01.localdomain:2135/cluster1/testdb");
 ...
 try (YdbConnector yc = new YdbConnector(propsConn)) {
