@@ -1,6 +1,5 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
-import com.google.gson.Gson;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -20,9 +19,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.google.gson.Gson;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
+
 import tech.ydb.common.transaction.TxMode;
 import tech.ydb.query.QuerySession;
 import tech.ydb.query.result.QueryResultPart;
@@ -37,7 +39,7 @@ import tech.ydb.table.values.Value;
 
 /**
  * Batch record processor for YDB.
- * 
+ *
  * @author zinal
  */
 public class Tool implements Runnable, AutoCloseable {
@@ -117,7 +119,7 @@ public class Tool implements Runnable, AutoCloseable {
             public Thread newThread(Runnable r) {
                 Thread t = new Thread(r);
                 t.setDaemon(true);
-                t.setName("ydb-exporter-worker-" 
+                t.setName("ydb-exporter-worker-"
                         + String.valueOf(threadCounter.incrementAndGet()));
                 return t;
             }
@@ -188,7 +190,7 @@ public class Tool implements Runnable, AutoCloseable {
             Thread.currentThread().interrupt();
         }
     }
-    
+
     private TxMode getIsolation() {
         if (job.getIsolation()==null) {
             return TxMode.SERIALIZABLE_RW;
@@ -196,7 +198,7 @@ public class Tool implements Runnable, AutoCloseable {
             return job.getIsolation();
         }
     }
-    
+
     private ExecuteQuerySettings getMainQuerySettings() {
         ExecuteQuerySettings.Builder settings = ExecuteQuerySettings.newBuilder();
         if (job.getTimeoutMainQuery() > 0L) {
@@ -223,7 +225,7 @@ public class Tool implements Runnable, AutoCloseable {
         }
         return settings.build();
     }
-    
+
     private void mainPagedRead() {
         LOG.info("Performing paged reads for the main query.");
 
@@ -416,7 +418,7 @@ public class Tool implements Runnable, AutoCloseable {
         }
         LOG.info("Dropping the batch of {} records due to shutdown.", output.getRowCount());
     }
-    
+
     private CharSequence formatJson(ArrayList<Object[]> block) {
         if (block.size() <= 1) {
             return "";
@@ -472,10 +474,10 @@ public class Tool implements Runnable, AutoCloseable {
     }
 
     private class OutputWorker implements Runnable {
-        
+
         final Writer writer;
         final boolean own;
-        
+
         OutputWorker() throws IOException {
             String fname = job.getOutputFile();
             if (fname.isEmpty() || fname.equalsIgnoreCase("-")) {
@@ -494,7 +496,7 @@ public class Tool implements Runnable, AutoCloseable {
                 LOG.info("Rows output configured to file {}", fname);
             }
         }
-        
+
         @Override
         public void run() {
             try {
@@ -511,7 +513,7 @@ public class Tool implements Runnable, AutoCloseable {
                 }
             }
         }
-        
+
         void doRun() throws IOException {
             boolean first = true;
             while (true) {

@@ -1,4 +1,4 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
 import java.util.HashMap;
 import tech.ydb.table.result.ResultSetReader;

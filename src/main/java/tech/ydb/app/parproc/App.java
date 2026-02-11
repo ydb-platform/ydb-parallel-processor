@@ -1,4 +1,4 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -13,8 +13,8 @@ public class App {
 
     public static void main(String[] args) {
         if (args.length != 2 && args.length != 3) {
-            System.out.println("USAGE: tech.ydb.samples.exporter.App connection.xml job.xml [properties.xml]");
-            System.exit(1);
+            System.out.println("USAGE: tech.ydb.app.parproc.App connection.xml job.xml [properties.xml]");
+            System.exit(2);
         }
         try {
             YdbConnector.Config ycc = YdbConnector.Config.fromFile(args[0]);
@@ -38,6 +38,7 @@ public class App {
             }
         } catch(Exception ex) {
             LOG.error("Execution failed", ex);
+            System.exit(1);
         }
     }
 

@@ -14,6 +14,11 @@ The basic workflow implemented by the tool consists of two phases:
 
 Phase 2 is executed using the configurable executor pool, providing parallel execution for enhanced performance. This means that the output records cannot generally be sorted, as the output from different parallel jobs will be provided in the undefined order.
 
+## Requirements
+
+- Java SDK 17 or later (for running and building)
+- Apache Maven (for building)
+
 ## Running the tool as a standalone program
 
 ```bash
@@ -30,7 +35,7 @@ For information about the substitution variables, see the section at the end of 
 
 ## Embedding the tool into the user program
 
-Using the class `tech.ydb.samples.exporter.Tool`, the following can be implemented:
+Using the class `tech.ydb.app.parproc.Tool`, the following can be implemented:
 
 ```java
 JobDef job = new JobDef();
@@ -78,24 +83,28 @@ Example properies file:
 
 ## Processing parameters
 
-Processing parameters are provieded either programmatically (as `tech.ydb.samples.exporter.JobDef` object), or via XML configuration file.
+Processing parameters are provided either programmatically (as `tech.ydb.app.parproc.JobDef` object), or via XML configuration file.
 
 | **Parameter** | **Description** |
 | --- | --- |
 | `worker-count` | Number of parallel workers |
 | `queue-size` | Size of the queue between the main query and the detail query |
 | `batch-limit` | Maximum number of keys in a batch for details query |
-| `output-format` | Output format (CSV, TSV, JSON) |
-| `output-file` | Output file name, with value '-' for STDOUT |
-| `isolation` | Transaction isolation level (SERIALIZABLE_RW, SNAPSHOT_RO, STALE_RO, ONLINE_RO, ONLINE_INCONSISTENT_RO) |
+| `output-format` | Output format (CSV, TSV, JSON, CUSTOM1 - see below for details). Default is CSV if omitted  |
+| `output-file` | Output file name, with value '-' for STDOUT. Default is '-' if omitted |
+| `isolation` | Transaction isolation level (SERIALIZABLE_RW, SNAPSHOT_RO, STALE_RO, ONLINE_RO, ONLINE_INCONSISTENT_RO). Default is SERIALIZABLE_RW if omitted |
 | `timeout` | Query timeout, in milliseconds, for query-main, query-page or query-detail, default -1 (unlimited) |
 | `query-main` | Main query (executed first) |
 | `query-page` | Paging query (optional). Requires key sorting and row count limit both for itself and for the main query. |
 | `query-detail` | Detail query. Takes the keys from main and page queries, and applies extra logic. |
-| `input-page` | List of input columns for the page query (subset of columns from main and page queries) |
-| `input-detail` | List of input columns for the detail query (subset of columns from main and page queries) |
-| `output-page` | List of output columns for the page query |
-| `output-detail` | List of output columns for the detail query |
+| `input-page` | List of input columns for the page query (subset of columns from main and page queries), optional |
+| `input-details` | List of input columns for the detail query (subset of columns from main and page queries), optional |
+
+Supported output formats:
+- `CSV` - regular CSV according to RFC4180, with comma delimited, double quotes, and CR-LF line separators
+- `TSV` - tab-delimoted format, double quotes, CR-LF
+- `JSON` - a separate JSON document per line, CR delimited
+- `CUSTOM1` - CSV-style format with 0x19 as field delimiter, LF (0x0A) as record delimiter and minimized (mostly no) quotes.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

@@ -1,4 +1,4 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

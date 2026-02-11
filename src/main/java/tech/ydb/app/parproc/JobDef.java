@@ -1,4 +1,4 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -9,7 +9,7 @@ import tech.ydb.common.transaction.TxMode;
 
 /**
  * Batch record processor job definition.
- * 
+ *
  * @author zinal
  */
 public class JobDef implements Serializable {
@@ -38,7 +38,7 @@ public class JobDef implements Serializable {
      * @return true, if pageQuery is defined, and false otherwise
      */
     public boolean hasPageQuery() {
-        return pageQuery!=null && !pageQuery.isEmpty();
+        return pageQuery != null && !pageQuery.isEmpty();
     }
 
     public int getWorkerCount() {
@@ -158,7 +158,7 @@ public class JobDef implements Serializable {
     }
 
     public static JobDef fromXml(String fname, Properties props) throws IOException {
-        if (props==null || props.isEmpty()) {
+        if (props == null || props.isEmpty()) {
             return fromXml(fname);
         }
         Element elRoot = JdomHelper.readDocument(fname);
@@ -170,31 +170,31 @@ public class JobDef implements Serializable {
         JobDef job = new JobDef();
         Element el;
         el = JdomHelper.getOneChild(docRoot, "worker-count");
-        if (el!=null) {
+        if (el != null) {
             job.setWorkerCount(JdomHelper.getInt(el));
         }
         el = JdomHelper.getOneChild(docRoot, "queue-size");
-        if (el!=null) {
+        if (el != null) {
             job.setQueueSize(JdomHelper.getInt(el));
         }
         el = JdomHelper.getOneChild(docRoot, "batch-limit");
-        if (el!=null) {
+        if (el != null) {
             job.setDetailsBatchLimit(JdomHelper.getInt(el));
         }
         el = JdomHelper.getOneChild(docRoot, "isolation");
-        if (el!=null) {
+        if (el != null) {
             String v = JdomHelper.getText(el);
             for (TxMode m : TxMode.values()) {
                 if (m.name().equalsIgnoreCase(v)) {
                     job.setIsolation(m);
                 }
             }
-            if (job.getIsolation()==null) {
+            if (job.getIsolation() == null) {
                 throw JdomHelper.raise(el, "Unknown isolation mode: " + v);
             }
         }
         el = JdomHelper.getOneChild(docRoot, "output-format");
-        if (el!=null) {
+        if (el != null) {
             String t = JdomHelper.getText(el);
             boolean found = false;
             for (Format f : Format.values()) {
@@ -209,15 +209,18 @@ public class JobDef implements Serializable {
             }
         }
         el = JdomHelper.getOneChild(docRoot, "output-file");
-        if (el!=null) {
+        if (el != null) {
             job.setOutputFile(JdomHelper.getText(el));
         }
         el = JdomHelper.getOneChild(docRoot, "output-encoding");
-        if (el!=null) {
+        if (el != null) {
             job.setOutputEncoding(JdomHelper.getText(el));
         }
 
         el = JdomHelper.getOneChild(docRoot, "query-main");
+        if (el == null) {
+            throw JdomHelper.raise(docRoot, "Missing query-main element");
+        }
         job.setMainQuery(JdomHelper.getText(el));
         job.setTimeoutMainQuery(JdomHelper.getLong(el, "timeout", -1L));
 
@@ -228,11 +231,14 @@ public class JobDef implements Serializable {
         }
 
         el = JdomHelper.getOneChild(docRoot, "query-details");
+        if (el == null) {
+            throw JdomHelper.raise(docRoot, "Missing query-details element");
+        }
         job.setDetailsQuery(JdomHelper.getText(el));
         job.setTimeoutDetailsQuery(JdomHelper.getLong(el, "timeout", -1L));
 
         el = JdomHelper.getOneChild(docRoot, "input-page");
-        if (el!=null) {
+        if (el != null) {
             JdomHelper.getSomeChildren(el, "column-name")
                     .forEach(col -> job.getPageInput().add(JdomHelper.getText(col)));
         }
@@ -240,21 +246,18 @@ public class JobDef implements Serializable {
             throw JdomHelper.raise(elPageQuery, "Missing input columns for page query");
         }
         el = JdomHelper.getOneChild(docRoot, "input-details");
-        if (el!=null) {
+        if (el != null) {
             JdomHelper.getSomeChildren(el, "column-name")
                     .forEach(col -> job.getDetailsInput().add(JdomHelper.getText(col)));
         }
-        if (job.getDetailsInput().isEmpty()) {
-            throw JdomHelper.raise(docRoot, "Missing input columns for details query");
-        }
         return job;
     }
-    
+
     public static enum Format {
         CUSTOM1,
         CSV,
         TSV,
         JSON
     }
-    
+
 }

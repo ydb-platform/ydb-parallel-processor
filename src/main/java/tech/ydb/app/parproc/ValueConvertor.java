@@ -1,4 +1,4 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
 import org.apache.commons.codec.binary.Base64;
 import tech.ydb.table.values.DecimalValue;

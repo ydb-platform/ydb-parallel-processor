@@ -1,4 +1,4 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
 import java.util.ArrayList;
 import tech.ydb.table.values.Value;
@@ -9,9 +9,9 @@ import tech.ydb.table.values.Value;
  * @author zinal
  */
 class StatsKeeper {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StatsKeeper.class);
-    
+
     long rowsInput = 0L;
     long rowsInside = 0L;
     long rowsOutput = 0L;
@@ -70,6 +70,9 @@ class StatsKeeper {
         long inside = rowsInside - rowsInsidePrev;
         long output = rowsOutput - rowsOutputPrev;
         long millis = tv - tvLast;
+        if (millis <= 0L) {
+            millis = 1L;
+        }
         double rateInput = ((double) input) * 1000.0 / ((double) millis);
         double rateInside = ((double) inside) * 1000.0 / ((double) millis);
         double rateOutput = ((double) output) * 1000.0 / ((double) millis);

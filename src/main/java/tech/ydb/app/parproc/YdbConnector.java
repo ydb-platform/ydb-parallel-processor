@@ -1,4 +1,4 @@
-package tech.ydb.samples.exporter;
+package tech.ydb.app.parproc;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,6 +31,10 @@ public class YdbConnector implements AutoCloseable {
     private final Config config;
 
     public YdbConnector(Config config) {
+        if (config == null || config.getConnectionString() == null
+                || config.getConnectionString().length() == 0) {
+            throw new IllegalArgumentException("Empty connection configuration passed");
+        }
         LOG.info("Connecting to {}...", config.getConnectionString());
         GrpcTransportBuilder builder = GrpcTransport
                 .forConnectionString(config.getConnectionString());
@@ -93,11 +97,11 @@ public class YdbConnector implements AutoCloseable {
     public YdbConnector(Properties props, String prefix) {
         this(new Config(props, prefix));
     }
-    
+
     public YdbConnector(String fname, String prefix) {
         this(Config.fromFile(fname, prefix));
     }
-    
+
     public YdbConnector(String fname) {
         this(Config.fromFile(fname));
     }
@@ -117,7 +121,7 @@ public class YdbConnector implements AutoCloseable {
     public String getDatabase() {
         return database;
     }
-    
+
     public QuerySession createQuerySession() {
         return queryClient.createSession(Duration.ofSeconds(60))
                 .join().getValue();
@@ -151,14 +155,14 @@ public class YdbConnector implements AutoCloseable {
     }
 
     /**
-    * Configuration class for YDB database connections.
-    * It holds various properties for connection strings, authentication settings,
-    * TLS certificate files, connection pool size, and a prefix used for property lookups.
-    * The configuration can be initialized with or without a set of Java Properties,
-    * optionally using a custom prefix for property names.
-    * A static method provided by the class allows loading configuration
-    * from an external XML properties file.
-    */
+     * Configuration class for YDB database connections. It holds various
+     * properties for connection strings, authentication settings, TLS
+     * certificate files, connection pool size, and a prefix used for property
+     * lookups. The configuration can be initialized with or without a set of
+     * Java Properties, optionally using a custom prefix for property names. A
+     * static method provided by the class allows loading configuration from an
+     * external XML properties file.
+     */
     public static final class Config {
 
         private String connectionString;
@@ -201,25 +205,28 @@ public class YdbConnector implements AutoCloseable {
         }
 
         /**
-        * Loads a configuration from the specified file.
-        * This is a convenience method that delegates to the overloaded version
-        * without an explicit property name prefix parameter.
-        *
-        * @param fname the file path to load the configuration from
-        * @return the parsed configuration object
-        */
+         * Loads a configuration from the specified file. This is a convenience
+         * method that delegates to the overloaded version without an explicit
+         * property name prefix parameter.
+         *
+         * @param fname the file path to load the configuration from
+         * @return the parsed configuration object
+         */
         public static Config fromFile(String fname) {
             return fromFile(fname, null);
         }
 
         /**
          * Reads and parses a configuration file into a {@link Config} object.
-         * The file is read as bytes, then parsed as XML properties.
-         * A custom prefix for property names can be applied during configuration processing.
+         * The file is read as bytes, then parsed as XML properties. A custom
+         * prefix for property names can be applied during configuration
+         * processing.
          *
          * @param fname the path to the configuration file
-         * @param prefix the custom prefix for property names to be read when constructing the Config object
-         * @return a new {@link Config} object loaded with the specified properties
+         * @param prefix the custom prefix for property names to be read when
+         * constructing the Config object
+         * @return a new {@link Config} object loaded with the specified
+         * properties
          * @throws RuntimeException if the file cannot be read or parsed
          */
         public static Config fromFile(String fname, String prefix) {
@@ -318,7 +325,7 @@ public class YdbConnector implements AutoCloseable {
 
     }
 
-    /** 
+    /**
      * Supported authentication modes for YDB connections.
      */
     public static enum AuthMode {
